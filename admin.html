@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Painel Administrativo</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <h1>
+            🚌 Painel da Perua Escolar
+        </h1>
+
+        <p>
+            Área administrativa
+        </p>
+
+
+        <!-- ========================= -->
+        <!-- RESUMO -->
+        <!-- ========================= -->
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>👨‍👩‍👧 Alunos</h3>
+                <strong id="totalAlunos">
+                    0
+                </strong>
+            </div>
+
+            <div class="card">
+                <h3>💰 Mensalidades</h3>
+                <strong id="totalMensalidades">
+                    R$ 0,00
+                </strong>
+            </div>
+
+            <div class="card">
+                <h3>✅ Pagas</h3>
+                <strong id="totalPagas">
+                    0
+                </strong>
+            </div>
+
+            <div class="card">
+                <h3>⏳ Pendentes</h3>
+                <strong id="totalPendentes">
+                    0
+                </strong>
+            </div>
+
+            <div class="card">
+                <h3>📅 Vencimentos</h3>
+                <strong id="totalVencimentos">
+                    0
+                </strong>
+            </div>
+
+            <div class="card">
+                <h3>🚌 Status</h3>
+                <strong id="statusResumo">
+                    Parada
+                </strong>
+            </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- CONTROLE DA ROTA -->
+        <!-- ========================= -->
+
+        <div class="section">
+
+            <h2>
+                🚌 Controle da rota
+            </h2>
+
+            <p id="textoStatus">
+                ⚪ Perua parada
+            </p>
+
+            <p id="horarioRota">
+                Nenhuma rota iniciada.
+            </p>
+
+
+            <div>
+
+                <button
+                    class="btn"
+                    onclick="iniciarRota()"
+                >
+                    🟢 Iniciar rota
+                </button>
+
+
+                <button
+                    class="btn"
+                    onclick="pausarRota()"
+                >
+                    🟡 Pausar rota
+                </button>
+
+
+                <button
+                    class="btn"
+                    onclick="encerrarRota()"
+                >
+                    🔴 Encerrar rota
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- LOCALIZAÇÃO -->
+        <!-- ========================= -->
+
+        <div class="section">
+
+            <h2>
+                📍 Localização da perua
+            </h2>
+
+            <p id="statusLocalizacao">
+                Localização não compartilhada.
+            </p>
+
+
+            <button
+                class="btn"
+                onclick="iniciarLocalizacao()"
+            >
+                📍 Compartilhar localização
+            </button>
+
+
+            <button
+                class="btn"
+                onclick="pararLocalizacao()"
+            >
+                ⛔ Parar localização
+            </button>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- CADASTRO -->
+        <!-- ========================= -->
+
+        <div class="section">
+
+            <h2>
+                ➕ Cadastrar aluno
+            </h2>
+
+
+            <form id="formAluno">
+
+                <input
+                    type="text"
+                    id="aluno"
+                    placeholder="Nome do aluno"
+                    required
+                >
+
+
+                <input
+                    type="text"
+                    id="responsavel"
+                    placeholder="Nome do responsável"
+                    required
+                >
+
+
+                <input
+                    type="text"
+                    id="telefone"
+                    placeholder="Telefone"
+                    required
+                >
+
+
+                <input
+                    type="text"
+                    id="usuario"
+                    placeholder="Usuário"
+                    required
+                >
+
+
+                <input
+                    type="password"
+                    id="senha"
+                    placeholder="Senha"
+                    required
+                >
+
+
+                <input
+                    type="number"
+                    id="mensalidade"
+                    placeholder="Mensalidade"
+                    step="0.01"
+                    required
+                >
+
+
+                <label>
+                    Vencimento
+                </label>
+
+                <input
+                    type="date"
+                    id="vencimento"
+                >
+
+
+                <label>
+                    Renovação
+                </label>
+
+                <input
+                    type="date"
+                    id="renovacao"
+                >
+
+
+                <button
+                    type="submit"
+                    class="btn"
+                >
+                    Cadastrar aluno
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- PESQUISA -->
+        <!-- ========================= -->
+
+        <div class="section">
+
+            <h2>
+                🔎 Alunos cadastrados
+            </h2>
+
+
+            <input
+                type="text"
+                id="pesquisa"
+                placeholder="Pesquisar aluno..."
+                oninput="mostrarAlunos()"
+            >
+
+
+            <div id="listaAlunos"></div>
+
+        </div>
+
+
+        <br>
+
+
+        <button
+            class="btn"
+            onclick="logout()"
+        >
+            Sair
+        </button>
+
+    </div>
+
+
+    <!-- SUPABASE -->
+
+    <script src="supabase.js"></script>
+
+
+    <script>
+
+        /* ========================================= */
+        /* VARIÁVEIS */
+        /* ========================================= */
+
+        let alunos = [];
+
+        let intervaloLocalizacao = null;
+
+
+        /* ========================================= */
+        /* VERIFICAR LOGIN */
+        /* ========================================= */
+
+        if (
+            localStorage.getItem("tipoUsuario")
+            !== "admin"
+        ) {
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        /* ========================================= */
+        /* BUSCAR ALUNOS DO SUPABASE */
+        /* ========================================= */
+
+        async function carregarAlunos() {
+
+            try {
+
+                const resposta =
+                    await fetch(
+                        SUPABASE_URL +
+                        "/rest/v1/alunos?select=*",
+                        {
+
+                            method: "GET",
+
+                            headers: {
+
+                                "apikey":
+                                    SUPABASE_KEY,
+
+                                "Authorization":
+                                    "Bearer " +
+                                    SUPABASE_KEY
+
+                            }
+
+                        }
+                    );
+
+
+                if (!resposta.ok) {
+
+                    throw new Error(
+                        "Erro ao buscar alunos."
+                    );
+
+                }
+
+
+                alunos =
+                    await resposta.json();
+
+
+                mostrarAlunos();
+
+                atualizarResumo();
+
+
+            } catch (erro) {
+
+                console.error(
+                    erro
+                );
+
+            }
+
+        }
+
+
+        /* ========================================= */
+        /* MOSTRAR ALUNOS */
+        /* ========================================= */
+
+        function mostrarAlunos() {
+
+            const lista =
+                document.getElementById(
+                    "listaAlunos"
+                );
+
+
+            const pesquisa =
+                document.getElementById(
+                    "pesquisa"
+                ).value
+                .toLowerCase();
+
+
+            lista.innerHTML = "";
+
+
+            const filtrados =
+                alunos.filter(
+                    function(aluno) {
+
+                        return aluno.aluno
+                            .toLowerCase()
+                            .includes(pesquisa);
+
+                    }
+                );
+
+
+            filtrados.forEach(
+                function(aluno) {
+
+                    const div =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    div.className =
+                        "card";
+
+
+                    div.innerHTML = `
+
+                        <h3>
+                            ${aluno.aluno}
+                        </h3>
+
+                        <p>
+                            Responsável:
+                            ${aluno.responsavel}
+                        </p>
+
+                        <p>
+                            Telefone:
+                            ${aluno.telefone}
+                        </p>
+
+                        <p>
+                            Mensalidade:
+                            R$ ${Number(
+                                aluno.mensalidade
+                            ).toFixed(2)}
+                        </p>
+
+                        <p>
+                            Status:
+                            ${
+                                aluno.pago
+                                ? "✅ Pago"
+                                : "⏳ Pendente"
+                            }
+                        </p>
+
+                    `;
+
+
+                    lista.appendChild(div);
+
+                }
+            );
+
+        }
+
+
+        /* ========================================= */
+        /* RESUMO */
+        /* ========================================= */
+
+        function atualizarResumo() {
+
+            document.getElementById(
+                "totalAlunos"
+            ).textContent =
+                alunos.length;
+
+
+            let total =
+                0;
+
+
+            let pagas =
+                0;
+
+
+            alunos.forEach(
+                function(aluno) {
+
+                    total +=
+                        Number(
+                            aluno.mensalidade
+                        );
+
+
+                    if (aluno.pago) {
+
+                        pagas++;
+
+                    }
+
+                }
+            );
+
+
+            document.getElementById(
+                "totalMensalidades"
+            ).textContent =
+                total.toLocaleString(
+                    "pt-BR",
+                    {
+                        style: "currency",
+                        currency: "BRL"
+                    }
+                );
+
+
+            document.getElementById(
+                "totalPagas"
+            ).textContent =
+                pagas;
+
+
+            document.getElementById(
+                "totalPendentes"
+            ).textContent =
+                alunos.length -
+                pagas;
+
+
+            const hoje =
+                new Date();
+
+
+            let vencimentos =
+                0;
+
+
+            alunos.forEach(
+                function(aluno) {
+
+                    if (!aluno.vencimento) {
+
+                        return;
+
+                    }
+
+
+                    const vencimento =
+                        new Date(
+                            aluno.vencimento
+                        );
+
+
+                    if (
+                        vencimento >= hoje
+                    ) {
+
+                        vencimentos++;
+
+                    }
+
+                }
+            );
+
+
+            document.getElementById(
+                "totalVencimentos"
+            ).textContent =
+                vencimentos;
+
+        }
+
+
+        /* ========================================= */
+        /* CADASTRAR ALUNO */
+        /* ========================================= */
+
+        document
+            .getElementById("formAluno")
+            .addEventListener(
+                "submit",
+                async function(event) {
+
+                    event.preventDefault();
+
+
+                    const novoAluno = {
+
+                        aluno:
+                            document.getElementById(
+                                "aluno"
+                            ).value.trim(),
+
+                        responsavel:
+                            document.getElementById(
+                                "responsavel"
+                            ).value.trim(),
+
+                        telefone:
+                            document.getElementById(
+                                "telefone"
+                            ).value.trim(),
+
+                        usuario:
+                            document.getElementById(
+                                "usuario"
+                            ).value.trim(),
+
+                        senha:
+                            document.getElementById(
+                                "senha"
+                            ).value.trim(),
+
+                        mensalidade:
+                            Number(
+                                document.getElementById(
+                                    "mensalidade"
+                                ).value
+                            ),
+
+                        vencimento:
+                            document.getElementById(
+                                "vencimento"
+                            ).value || null,
+
+                        renovacao:
+                            document.getElementById(
+                                "renovacao"
+                            ).value || null,
+
+                        pago:
+                            false
+
+                    };
+
+
+                    try {
+
+                        const resposta =
+                            await fetch(
+                                SUPABASE_URL +
+                                "/rest/v1/alunos",
+                                {
+
+                                    method: "POST",
+
+                                    headers: {
+
+                                        "Content-Type":
+                                            "application/json",
+
+                                        "apikey":
+                                            SUPABASE_KEY,
+
+                                        "Authorization":
+                                            "Bearer " +
+                                            SUPABASE_KEY,
+
+                                        "Prefer":
+                                            "return=representation"
+
+                                    },
+
+                                    body:
+                                        JSON.stringify(
+                                            novoAluno
+                                        )
+
+                                }
+                            );
+
+
+                        if (!resposta.ok) {
+
+                            const erro =
+                                await resposta.text();
+
+
+                            console.error(
+                                erro
+                            );
+
+
+                            alert(
+                                "Não foi possível cadastrar o aluno."
+                            );
+
+
+                            return;
+
+                        }
+
+
+                        alert(
+                            "Aluno cadastrado com sucesso!"
+                        );
+
+
+                        document
+                            .getElementById(
+                                "formAluno"
+                            )
+                            .reset();
+
+
+                        await carregarAlunos();
+
+
+                    } catch (erro) {
+
+                        console.error(
+                            erro
+                        );
+
+
+                        alert(
+                            "Erro ao conectar ao Supabase."
+                        );
+
+                    }
+
+                }
+            );
+
+
+        /* ========================================= */
+        /* OBTER ROTA */
+        /* ========================================= */
+
+        async function obterRota() {
+
+            try {
+
+                const resposta =
+                    await fetch(
+                        SUPABASE_URL +
+                        "/rest/v1/rota?id=eq.1&select=*",
+                        {
+
+                            method: "GET",
+
+                            headers: {
+
+                                "apikey":
+                                    SUPABASE_KEY,
+
+                                "Authorization":
+                                    "Bearer " +
+                                    SUPABASE_KEY
+
+                            }
+
+                        }
+                    );
+
+
+                if (!resposta.ok) {
+
+                    throw new Error(
+                        "Erro ao buscar a rota."
+                    );
+
+                }
+
+
+                const rotas =
+                    await resposta.json();
+
+
+                return rotas[0] || {
+
+                    status:
+                        "parada",
+
+                    inicio:
+                        null
+
+                };
+
+
+            } catch (erro) {
+
+                console.error(
+                    "Erro ao buscar rota:",
+                    erro
+                );
+
+
+                return {
+
+                    status:
+                        "parada",
+
+                    inicio:
+                        null
+
+                };
+
+            }
+
+        }
+
+
+        /* ========================================= */
+        /* ATUALIZAR STATUS DA ROTA */
+        /* ========================================= */
+
+        async function atualizarRota() {
+
+            const rota =
+                await obterRota();
+
+
+            const texto =
+                document.getElementById(
+                    "textoStatus"
+                );
+
+
+            const horario =
+                document.getElementById(
+                    "horarioRota"
+                );
+
+
+            const resumo =
+                document.getElementById(
+                    "statusResumo"
+                );
+
+
+            if (
+                rota.status === "rota"
+            ) {
+
+                texto.textContent =
+                    "🟢 Perua em rota";
+
+
+                texto.style.color =
+                    "#166534";
+
+
+                resumo.textContent =
+                    "Em rota";
+
+
+                if (rota.inicio) {
+
+                    const data =
+                        new Date(
+                            rota.inicio
+                        );
+
+
+                    horario.textContent =
+                        "Rota iniciada às " +
+                        data.toLocaleTimeString(
+                            "pt-BR",
+                            {
+                                hour: "2-digit",
+                                minute: "2-digit"
+                            }
+                        );
+
+                }
+
+            }
+
+
+            else if (
+                rota.status === "pausada"
+            ) {
+
+                texto.textContent =
+                    "🟡 Rota pausada";
+
+
+                texto.style.color =
+                    "#92400e";
+
+
+                resumo.textContent =
+                    "Pausada";
+
+
+                horario.textContent =
+                    "A rota está temporariamente pausada.";
+
+            }
+
+
+            else {
+
+                texto.textContent =
+                    "⚪ Perua parada";
+
+
+                texto.style.color =
+                    "#64748b";
+
+
+                resumo.textContent =
+                    "Parada";
+
+
+                horario.textContent =
+                    "Nenhuma rota iniciada.";
+
+            }
+
+        }
+
+
+        /* ========================================= */
+        /* SALVAR ROTA */
+        /* ========================================= */
+
+        async function salvarRota(
+            status,
+            inicio
+        ) {
+
+            try {
+
+                const resposta =
+                    await fetch(
+                        SUPABASE_URL +
+                        "/rest/v1/rota?id=eq.1",
+                        {
+
+                            method: "PATCH",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "apikey":
+                                    SUPABASE_KEY,
+
+                                "Authorization":
+                                    "Bearer " +
+                                    SUPABASE_KEY,
+
+                                "Prefer":
+                                    "return=representation"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    status:
+                                        status,
+
+                                    inicio:
+                                        inicio,
+
+                                    atualizado_em:
+                                        new Date()
+                                        .toISOString()
+
+                                })
+
+                        }
+                    );
+
+
+                if (!resposta.ok) {
+
+                    const erro =
+                        await resposta.text();
+
+
+                    console.error(
+                        erro
+                    );
+
+
+                    alert(
+                        "Não foi possível atualizar a rota."
+                    );
+
+
+                    return false;
+
+                }
+
+
+                await atualizarRota();
+
+
+                return true;
+
+
+            } catch (erro) {
+
+                console.error(
+                    erro
+                );
+
+
+                alert(
+                    "Erro de conexão com o Supabase."
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+
+        /* ========================================= */
+        /* INICIAR ROTA */
+        /* ========================================= */
+
+        async function iniciarRota() {
+
+            const confirmar =
+                confirm(
+                    "Deseja iniciar a rota?"
+                );
+
+
+            if (!confirmar) {
+
+                return;
+
+            }
+
+
+            const inicio =
+                new Date()
+                .toISOString();
+
+
+            await salvarRota(
+                "rota",
+                inicio
+            );
+
+        }
+
+
+        /* ========================================= */
+        /* PAUSAR ROTA */
+        /* ========================================= */
+
+        async function pausarRota() {
+
+            const rota =
+                await obterRota();
+
+
+            if (
+                rota.status !== "rota"
+            ) {
+
+                alert(
+                    "A rota não está em andamento."
+                );
+
+
+                return;
+
+            }
+
+
+            await salvarRota(
+                "pausada",
+                rota.inicio
+            );
+
+        }
+
+
+        /* ========================================= */
+        /* ENCERRAR ROTA */
+        /* ========================================= */
+
+        async function encerrarRota() {
+
+            const confirmar =
+                confirm(
+                    "Deseja realmente encerrar a rota?"
+                );
+
+
+            if (!confirmar) {
+
+                return;
+
+            }
+
+
+            await salvarRota(
+                "parada",
+                null
+            );
+
+        }
+
+
+        /* ========================================= */
+        /* ENVIAR LOCALIZAÇÃO PARA O SUPABASE */
+        /* ========================================= */
+
+        async function enviarLocalizacao(
+            posicao
+        ) {
+
+            const latitude =
+                posicao.coords.latitude;
+
+
+            const longitude =
+                posicao.coords.longitude;
+
+
+            console.log(
+                "Latitude:",
+                latitude
+            );
+
+
+            console.log(
+                "Longitude:",
+                longitude
+            );
+
+
+            try {
+
+                const resposta =
+                    await fetch(
+                        SUPABASE_URL +
+                        "/rest/v1/rota?id=eq.1",
+                        {
+
+                            method: "PATCH",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "apikey":
+                                    SUPABASE_KEY,
+
+                                "Authorization":
+                                    "Bearer " +
+                                    SUPABASE_KEY,
+
+                                "Prefer":
+                                    "return=representation"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    latitude:
+                                        latitude,
+
+                                    longitude:
+                                        longitude,
+
+                                    atualizado_em:
+                                        new Date()
+                                        .toISOString()
+
+                                })
+
+                        }
+                    );
+
+
+                if (!resposta.ok) {
+
+                    const erro =
+                        await resposta.text();
+
+
+                    console.error(
+                        "Erro GPS:",
+                        erro
+                    );
+
+
+                    return;
+
+                }
+
+
+                document.getElementById(
+                    "statusLocalizacao"
+                ).textContent =
+                    "🟢 Localização sendo compartilhada";
+
+
+                console.log(
+                    "Localização enviada ao Supabase!"
+                );
+
+
+            } catch (erro) {
+
+                console.error(
+                    "Erro ao enviar localização:",
+                    erro
+                );
+
+            }
+
+        }
+
+
+        /* ========================================= */
+        /* INICIAR COMPARTILHAMENTO GPS */
+        /* ========================================= */
+
+        function iniciarLocalizacao() {
+
+            if (
+                !navigator.geolocation
+            ) {
+
+                alert(
+                    "Seu navegador não suporta localização GPS."
+                );
+
+
+                return;
+
+            }
+
+
+            if (
+                intervaloLocalizacao
+            ) {
+
+                alert(
+                    "A localização já está sendo compartilhada."
+                );
+
+
+                return;
+
+            }
+
+
+            navigator.geolocation.getCurrentPosition(
+
+                function(posicao) {
+
+                    enviarLocalizacao(
+                        posicao
+                    );
+
+                },
+
+                function(erro) {
+
+                    console.error(
+                        erro
+                    );
+
+
+                    alert(
+                        "Não foi possível obter sua localização. Verifique se o GPS e a permissão de localização estão ativados."
+                    );
+
+                },
+
+                {
+
+                    enableHighAccuracy:
+                        true,
+
+                    maximumAge:
+                        5000,
+
+                    timeout:
+                        10000
+
+                }
+
+            );
+
+
+            intervaloLocalizacao =
+                setInterval(
+
+                    function() {
+
+                        navigator.geolocation.getCurrentPosition(
+
+                            function(posicao) {
+
+                                enviarLocalizacao(
+                                    posicao
+                                );
+
+                            },
+
+                            function(erro) {
+
+                                console.error(
+                                    "Erro ao atualizar GPS:",
+                                    erro
+                                );
+
+                            },
+
+                            {
+
+                                enableHighAccuracy:
+                                    true,
+
+                                maximumAge:
+                                    5000,
+
+                                timeout:
+                                    10000
+
+                            }
+
+                        );
+
+                    },
+
+                    5000
+
+                );
+
+
+            document.getElementById(
+                "statusLocalizacao"
+            ).textContent =
+                "🟡 Obtendo localização...";
+
+        }
+
+
+        /* ========================================= */
+        /* PARAR COMPARTILHAMENTO GPS */
+        /* ========================================= */
+
+        function pararLocalizacao() {
+
+            if (
+                intervaloLocalizacao
+            ) {
+
+                clearInterval(
+                    intervaloLocalizacao
+                );
+
+
+                intervaloLocalizacao =
+                    null;
+
+            }
+
+
+            document.getElementById(
+                "statusLocalizacao"
+            ).textContent =
+                "⚪ Localização não compartilhada.";
+
+        }
+
+
+        /* ========================================= */
+        /* LOGOUT */
+        /* ========================================= */
+
+        function logout() {
+
+            localStorage.removeItem(
+                "tipoUsuario"
+            );
+
+
+            localStorage.removeItem(
+                "usuarioLogado"
+            );
+
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        /* ========================================= */
+        /* INICIALIZAÇÃO */
+        /* ========================================= */
+
+        carregarAlunos();
+
+        atualizarRota();
+
+    </script>
+
+</body>
+
+</html>

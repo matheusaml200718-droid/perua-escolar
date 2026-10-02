@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Área do Responsável</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css">
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <style>
+
+        body {
+            background: #f1f5f9;
+        }
+
+        .painel-responsavel {
+            max-width: 1000px;
+            margin: auto;
+            padding: 25px 18px;
+        }
+
+        .boas-vindas {
+            background: linear-gradient(
+                135deg,
+                #2563eb,
+                #1d4ed8
+            );
+
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .boas-vindas h2 {
+            margin-bottom: 8px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 17px;
+            box-shadow:
+                0 5px 20px rgba(0,0,0,0.06);
+        }
+
+        .card h3 {
+            margin-bottom: 12px;
+            color: #374151;
+        }
+
+        .valor {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 8px;
+        }
+
+        .pago {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 10px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .pendente {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 10px;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .status-perua {
+            background: white;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 17px;
+            box-shadow:
+                0 5px 20px rgba(0,0,0,0.06);
+        }
+
+        .status-box {
+            padding: 20px;
+            border-radius: 15px;
+            background: #f8fafc;
+            margin-top: 15px;
+        }
+
+        .status-box h3 {
+            margin-bottom: 8px;
+            font-size: 21px;
+        }
+
+        .status-box p {
+            color: #64748b;
+        }
+
+        .localizacao {
+            background: white;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 17px;
+            box-shadow:
+                0 5px 20px rgba(0,0,0,0.06);
+        }
+
+        #mapaReal {
+            height: 350px;
+            margin-top: 15px;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .localizacao-info {
+            margin-top: 10px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .contato {
+            background: white;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 17px;
+            box-shadow:
+                0 5px 20px rgba(0,0,0,0.06);
+        }
+
+        .contato a {
+            display: inline-block;
+            margin-top: 12px;
+            background: #2563eb;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 700px) {
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 19px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>
+        🚌 Perua Escolar
+    </h1>
+
+    <button onclick="sair()">
+        Sair
+    </button>
+
+</header>
+
+
+<main class="painel-responsavel">
+
+
+    <section class="boas-vindas">
+
+        <h2 id="nomeAluno">
+            Olá!
+        </h2>
+
+        <p>
+            Bem-vindo à área do responsável.
+        </p>
+
+    </section>
+
+
+    <section class="cards">
+
+
+        <div class="card">
+
+            <h3>
+                💰 Mensalidade
+            </h3>
+
+            <p
+                class="valor"
+                id="mensalidade">
+                R$ 0,00
+            </p>
+
+            <span id="statusPagamento">
+                -
+            </span>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>
+                📅 Vencimento
+            </h3>
+
+            <p
+                class="valor"
+                id="vencimento">
+                -
+            </p>
+
+            <p>
+                Data da mensalidade
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>
+                🔄 Renovação
+            </h3>
+
+            <p
+                class="valor"
+                id="renovacao">
+                -
+            </p>
+
+            <p>
+                Data da renovação
+            </p>
+
+        </div>
+
+
+    </section>
+
+
+    <section class="status-perua">
+
+        <h2>
+            🚌 Status da Perua
+        </h2>
+
+
+        <div
+            class="status-box"
+            id="statusPerua">
+
+            <h3 id="textoStatusPerua">
+                ⚪ Perua parada
+            </h3>
+
+            <p id="horarioStatusPerua">
+                Nenhuma rota iniciada.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <section class="localizacao">
+
+        <h2>
+            📍 Localização da Perua
+        </h2>
+
+        <div id="mapaReal"></div>
+
+        <p
+            class="localizacao-info"
+            id="informacaoLocalizacao">
+
+            Aguardando localização da perua...
+
+        </p>
+
+    </section>
+
+
+    <section class="contato">
+
+        <h2>
+            📞 Contato
+        </h2>
+
+        <p>
+            Entre em contato com a responsável pela perua.
+        </p>
+
+
+        <a
+            id="botaoContato"
+            href="#">
+
+            📱 Entrar em contato
+
+        </a>
+
+    </section>
+
+
+</main>
+
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
+<script src="supabase.js"></script>
+
+
+<script>
+
+
+/* =========================
+   DADOS DO RESPONSÁVEL
+========================= */
+
+async function carregarDados() {
+
+    const usuarioLogado =
+        localStorage.getItem(
+            "usuarioLogado"
+        );
+
+
+    if (!usuarioLogado) {
+
+        window.location.href =
+            "index.html";
+
+        return;
+
+    }
+
+
+    try {
+
+        const resposta =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/alunos?usuario=eq." +
+                encodeURIComponent(
+                    usuarioLogado
+                ) +
+                "&select=*",
+                {
+
+                    method: "GET",
+
+                    headers: {
+
+                        "apikey":
+                            SUPABASE_KEY,
+
+                        "Authorization":
+                            "Bearer " +
+                            SUPABASE_KEY
+
+                    }
+
+                }
+            );
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                "Erro HTTP: " +
+                resposta.status
+            );
+
+        }
+
+
+        const alunos =
+            await resposta.json();
+
+
+        const aluno =
+            alunos[0];
+
+
+        if (!aluno) {
+
+            alert(
+                "Usuário não encontrado."
+            );
+
+
+            window.location.href =
+                "index.html";
+
+            return;
+
+        }
+
+
+        document.getElementById(
+            "nomeAluno"
+        ).textContent =
+            "Olá, " +
+            aluno.responsavel +
+            "!";
+
+
+        document.getElementById(
+            "mensalidade"
+        ).textContent =
+            Number(
+                aluno.mensalidade
+            ).toLocaleString(
+                "pt-BR",
+                {
+                    style: "currency",
+                    currency: "BRL"
+                }
+            );
+
+
+        document.getElementById(
+            "vencimento"
+        ).textContent =
+            formatarData(
+                aluno.vencimento
+            );
+
+
+        document.getElementById(
+            "renovacao"
+        ).textContent =
+            formatarData(
+                aluno.renovacao
+            );
+
+
+        const statusPagamento =
+            document.getElementById(
+                "statusPagamento"
+            );
+
+
+        if (
+            aluno.pago === true ||
+            aluno.pago === "true"
+        ) {
+
+            statusPagamento.textContent =
+                "✓ Mensalidade paga";
+
+            statusPagamento.className =
+                "pago";
+
+        } else {
+
+            statusPagamento.textContent =
+                "⚠️ Mensalidade pendente";
+
+            statusPagamento.className =
+                "pendente";
+
+        }
+
+
+        const botaoContato =
+            document.getElementById(
+                "botaoContato"
+            );
+
+
+        const telefone =
+            String(
+                aluno.telefone || ""
+            ).replace(
+                /\D/g,
+                ""
+            );
+
+
+        botaoContato.href =
+            "https://wa.me/55" +
+            telefone;
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao carregar dados:",
+            erro
+        );
+
+
+        document.getElementById(
+            "nomeAluno"
+        ).textContent =
+            "Erro ao carregar os dados.";
+
+    }
+
+}
+
+
+/* =========================
+   FORMATAR DATA
+========================= */
+
+function formatarData(data) {
+
+    if (!data) {
+
+        return "-";
+
+    }
+
+
+    const partes =
+        data.split("-");
+
+
+    return (
+        partes[2] +
+        "/" +
+        partes[1] +
+        "/" +
+        partes[0]
+    );
+
+}
+
+
+/* =========================
+   BUSCAR ROTA
+========================= */
+
+async function obterRota() {
+
+    try {
+
+        const resposta =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/rota?id=eq.1&select=*",
+                {
+
+                    method: "GET",
+
+                    headers: {
+
+                        "apikey":
+                            SUPABASE_KEY,
+
+                        "Authorization":
+                            "Bearer " +
+                            SUPABASE_KEY
+
+                    }
+
+                }
+            );
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                "Erro ao consultar a rota."
+            );
+
+        }
+
+
+        const rotas =
+            await resposta.json();
+
+
+        return rotas[0] || {
+
+            status:
+                "parada",
+
+            inicio:
+                null,
+
+            latitude:
+                null,
+
+            longitude:
+                null
+
+        };
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao buscar rota:",
+            erro
+        );
+
+
+        return {
+
+            status:
+                "parada",
+
+            inicio:
+                null,
+
+            latitude:
+                null,
+
+            longitude:
+                null
+
+        };
+
+    }
+
+}
+
+
+/* =========================
+   ATUALIZAR STATUS
+========================= */
+
+async function atualizarStatusPerua() {
+
+    const rota =
+        await obterRota();
+
+
+    const texto =
+        document.getElementById(
+            "textoStatusPerua"
+        );
+
+
+    const horario =
+        document.getElementById(
+            "horarioStatusPerua"
+        );
+
+
+    if (
+        rota.status === "rota"
+    ) {
+
+        texto.textContent =
+            "🟢 Perua em rota";
+
+        texto.style.color =
+            "#166534";
+
+
+        if (rota.inicio) {
+
+            const data =
+                new Date(
+                    rota.inicio
+                );
+
+
+            horario.textContent =
+                "Rota iniciada às " +
+                data.toLocaleTimeString(
+                    "pt-BR",
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    }
+                );
+
+        } else {
+
+            horario.textContent =
+                "Rota em andamento.";
+
+        }
+
+    }
+
+
+    else if (
+        rota.status === "pausada"
+    ) {
+
+        texto.textContent =
+            "🟡 Rota pausada";
+
+        texto.style.color =
+            "#92400e";
+
+
+        horario.textContent =
+            "A rota está temporariamente pausada.";
+
+    }
+
+
+    else {
+
+        texto.textContent =
+            "⚪ Perua parada";
+
+        texto.style.color =
+            "#64748b";
+
+
+        horario.textContent =
+            "Nenhuma rota iniciada.";
+
+    }
+
+
+    atualizarMapa(
+        rota
+    );
+
+}
+
+
+/* =========================
+   MAPA
+========================= */
+
+const mapa =
+    L.map(
+        "mapaReal"
+    ).setView(
+        [-23.5505, -46.6333],
+        13
+    );
+
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+
+        attribution:
+            "&copy; OpenStreetMap contributors"
+
+    }
+).addTo(
+    mapa
+);
+
+
+const marcador =
+    L.marker(
+        [-23.5505, -46.6333]
+    ).addTo(
+        mapa
+    );
+
+
+marcador.bindPopup(
+    "🚌 Perua Escolar"
+);
+
+
+/* =========================
+   ATUALIZAR MAPA COM GPS
+========================= */
+
+let primeiraLocalizacao =
+    true;
+
+
+function atualizarMapa(rota) {
+
+    const informacao =
+        document.getElementById(
+            "informacaoLocalizacao"
+        );
+
+
+    if (
+        rota.latitude === null ||
+        rota.longitude === null ||
+        rota.latitude === undefined ||
+        rota.longitude === undefined
+    ) {
+
+        informacao.textContent =
+            "Aguardando a localização da perua.";
+
+        return;
+
+    }
+
+
+    const latitude =
+        Number(
+            rota.latitude
+        );
+
+
+    const longitude =
+        Number(
+            rota.longitude
+        );
+
+
+    if (
+        isNaN(latitude) ||
+        isNaN(longitude)
+    ) {
+
+        informacao.textContent =
+            "Localização indisponível.";
+
+        return;
+
+    }
+
+
+    marcador.setLatLng(
+        [
+            latitude,
+            longitude
+        ]
+    );
+
+
+    marcador
+        .bindPopup(
+            "🚌 Perua Escolar"
+        );
+
+
+    /*
+       Na primeira localização,
+       centraliza o mapa na perua.
+    */
+
+    if (
+        primeiraLocalizacao
+    ) {
+
+        mapa.setView(
+            [
+                latitude,
+                longitude
+            ],
+            16
+        );
+
+
+        primeiraLocalizacao =
+            false;
+
+    }
+
+
+    const ultimaAtualizacao =
+        rota.atualizado_em;
+
+
+    if (
+        ultimaAtualizacao
+    ) {
+
+        const data =
+            new Date(
+                ultimaAtualizacao
+            );
+
+
+        informacao.textContent =
+            "📍 Localização atualizada às " +
+            data.toLocaleTimeString(
+                "pt-BR",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                }
+            );
+
+    } else {
+
+        informacao.textContent =
+            "📍 Localização da perua atualizada.";
+
+    }
+
+}
+
+
+/* =========================
+   SAIR
+========================= */
+
+function sair() {
+
+    localStorage.removeItem(
+        "tipoUsuario"
+    );
+
+
+    localStorage.removeItem(
+        "usuarioLogado"
+    );
+
+
+    window.location.href =
+        "index.html";
+
+}
+
+
+/* =========================
+   INICIAR
+========================= */
+
+carregarDados();
+
+atualizarStatusPerua();
+
+
+/*
+   Atualiza o status e o GPS
+   a cada 2 segundos.
+*/
+
+setInterval(
+    atualizarStatusPerua,
+    2000
+);
+
+
+</script>
+
+
+</body>
+
+</html>
