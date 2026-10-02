@@ -1424,3 +1424,64 @@
 </body>
 
 </html>
+
+<script>
+
+async function verificarAdministrador() {
+
+    const token =
+        localStorage.getItem("adminToken");
+
+    if (!token) {
+
+        window.location.href = "index.html";
+
+        return;
+    }
+
+    try {
+
+        const resposta = await fetch(
+            SUPABASE_URL + "/auth/v1/user",
+            {
+                method: "GET",
+
+                headers: {
+                    "apikey": SUPABASE_KEY,
+                    "Authorization":
+                        "Bearer " + token
+                }
+            }
+        );
+
+        if (!resposta.ok) {
+
+            localStorage.removeItem(
+                "adminToken"
+            );
+
+            localStorage.removeItem(
+                "tipoUsuario"
+            );
+
+            window.location.href =
+                "index.html";
+
+            return;
+        }
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao verificar administrador:",
+            erro
+        );
+
+        window.location.href =
+            "index.html";
+    }
+}
+
+verificarAdministrador();
+
+</script>
