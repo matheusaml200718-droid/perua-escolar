@@ -10,14 +10,59 @@ loginForm.addEventListener("submit", async function(event) {
 
 
     // LOGIN DA ADMINISTRADORA
-    if (usuario === "admin" && senha === "admin") {
+    if (usuario.includes("@")) {
 
-        localStorage.setItem("tipoUsuario", "admin");
+    try {
+
+        const resposta = await fetch(
+            SUPABASE_URL + "/auth/v1/token?grant_type=password",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": SUPABASE_KEY
+                },
+
+                body: JSON.stringify({
+                    email: usuario,
+                    password: senha
+                })
+            }
+        );
+
+        if (!resposta.ok) {
+            mensagem.textContent =
+                "E-mail ou senha incorretos.";
+            return;
+        }
+
+        const dados = await resposta.json();
+
+        localStorage.setItem(
+            "tipoUsuario",
+            "admin"
+        );
+
+        localStorage.setItem(
+            "adminToken",
+            dados.access_token
+        );
 
         window.location.href = "admin.html";
 
         return;
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        mensagem.textContent =
+            "Erro ao conectar ao servidor.";
+
+        return;
     }
+}
 
 
     // BUSCAR ALUNOS CADASTRADOS
