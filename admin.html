@@ -23,11 +23,16 @@
 <body>
 
     <div class="container">
+<div class="cabecalho-admin">
+    <h1>Painel da Perua Escolar</h1>
 
-        <h1>
-            🚌 Painel da Perua Escolar
-        </h1>
-
+   <button
+    type="button"
+    class="botao-sair"
+    onclick="localStorage.removeItem('adminToken'); localStorage.removeItem('tipoUsuario'); window.location.href='index.html';">
+    🚪 Sair
+</button>
+</div>
         <p>
             Área administrativa
         </p>
