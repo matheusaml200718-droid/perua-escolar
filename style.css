@@ -528,3 +528,58 @@ header button {
 
 }
 
+.cabecalho-admin {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.cabecalho-admin h1 {
+    margin: 0;
+    text-align: center;
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.botao-sair {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+
+    display: inline-block !important;
+    width: auto !important;
+    min-width: 90px !important;
+    height: 42px !important;
+    padding: 0 16px !important;
+
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 42px !important;
+    text-align: center !important;
+
+    cursor: pointer;
+
+    box-shadow:
+        4px 4px 8px rgba(0, 0, 0, 0.18),
+        -3px -3px 7px rgba(255, 255, 255, 0.9) !important;
+
+    transition: 0.15s;
+}
+
+.botao-sair:active {
+    transform: translateY(calc(-50% + 1px));
+
+    box-shadow:
+        inset 3px 3px 6px rgba(0, 0, 0, 0.18),
+        inset -2px -2px 5px rgba(255, 255, 255, 0.8) !important;
+}
